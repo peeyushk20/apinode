@@ -6,14 +6,13 @@ const port = 3000
 const schema = require('./middleware/schemas'); 
 const middlewar= require('./middleware/joi_validation'); 
 const bodyParser = require("body-parser");
+const fs = require('fs')
+var db = require('./config/config');
+var authenticateController=require('./controllers/authenticate-controller');
 
-const mysql = require('mysql2')
-const connection = mysql.createConnection({
-  host: '13.233.108.165',
-  user: 'newuser',
-  password: '()@))@&())',
-  database: 'user'
-})
+
+
+
 
 app.use(cors()); 
 app.use(bodyParser.json()); 
@@ -23,9 +22,15 @@ app.get('/', (req: any, res: any) => {
   res.end('Hello World!');
 });
 
+app.get('/api/list_users', (req, res) => {
+    fs.readFile('/home/peeyushk/Desktop/apinode/users.json', 'utf8', (err, data) => {
+        res.end(data);
+    });
+});
+
 
 app.get('/api/list_users2', (req, res) => {
-    connection.query(
+    db.query(
         'SELECT * FROM `login`' ,
         function(err, results, fields) {
 
@@ -34,7 +39,8 @@ app.get('/api/list_users2', (req, res) => {
 });
 
 
-app.post('/api/login', middlewar(schema.login) , (req: any, res: any) => { 
+
+app.post('/api/login', middlewar(schema.login) , authenticateController.authenticate, (req: any, res: any) => { 
   console.log('/update'); 
   res.json(req.body); 
 }); 
